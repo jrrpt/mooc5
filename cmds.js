@@ -163,7 +163,7 @@ exports.testCmd = (rl, id) => {
     let quiz = model.getByIndex(id);
     log(quiz.question + "?", "red");
     rl.question("", answer => {
-      if (answer.toLowerCase() === quiz.answer.toLowerCase()) {
+      if (answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim()) {
         log("Correcto", "green");
       } else {
         log("Incorrecto", "red");
@@ -181,7 +181,7 @@ exports.testCmd = (rl, id) => {
  *
  * @param a Array a barajar o desordenar
  */
-function shuffle(a) {
+const shuffle = a => {
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
@@ -193,14 +193,30 @@ function shuffle(a) {
  * Función que realiza una pregunta y devuelve un valor booleano indicando
  * si la respuesta ha sido correcta o no.
  *
- * @param p Objeto que contiene la pregunta a realizar
+ * @param rl Objeto readline usado para implementar el CLI.
+ * @param quizzes Array con los objetos preguntas
+ * @param puntos Puntos acumulados del jugador
  */
-function pregunta(p) {
+const pregunta = (rl, quizzes, puntos) =>{
   let correcto = true;
-
-  log(p.question + "?", "red");
-
-  return correcto;
+  try{
+    let p= quizzes.pop();
+    log(p.question + "?", "red");
+    rl.question("", answer => {
+      if (answer.toLowerCase().trim() === p.answer.toLowerCase().trim()) {
+        log(`CORRECTO - Llevas ${++puntos} aciertos.`, "green");
+        pregunta(rl, quizzes, puntos);
+      } else {
+        log("INCORRECTO", "red");
+        biglog(puntos,"magenta");
+        rl.prompt();
+      }
+    });
+  } catch (error) {
+    log("Ya no quedan más preguntas.")
+    biglog(puntos,"magenta");
+    rl.prompt();
+  }
 }
 
 /**
@@ -216,24 +232,7 @@ exports.playCmd = rl => {
   let element;
 
   shuffle(quizzes);
-
-  for (let element of quizzes) {
-    let acierto = pregunta(element);
-    if (acierto) {
-      puntos++;
-      log("CORRECTO - Lleva " + puntos + " aciertos.", "green");
-    } else {
-      br = true;
-      log("INCORRECTO", "red");
-      break;
-    }
-  }
-  if (!br) {
-    log("No hay nada más que preguntar.", "white");
-  }
-  log("Fin del juego. Aciertos: " + puntos, "white");
-  biglog(puntos, "magenta");
-  rl.prompt();
+  pregunta(rl, quizzes, puntos );
 };
 
 /**
