@@ -187,7 +187,7 @@ const shuffle = a => {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
+};
 
 /**
  * Función que realiza una pregunta y devuelve un valor booleano indicando
@@ -197,27 +197,29 @@ const shuffle = a => {
  * @param quizzes Array con los objetos preguntas
  * @param puntos Puntos acumulados del jugador
  */
-const pregunta = (rl, quizzes, puntos) =>{
+const pregunta = (rl, quizzes, puntos) => {
   let correcto = true;
-  try{
-    let p= quizzes.pop();
+  try {
+    let p = quizzes.pop();
     log(p.question + "?", "red");
     rl.question("", answer => {
       if (answer.toLowerCase().trim() === p.answer.toLowerCase().trim()) {
-        log(`CORRECTO - Llevas ${++puntos} aciertos.`, "green");
+        log(`CORRECTO - Lleva ${++puntos} aciertos.`, "green");
         pregunta(rl, quizzes, puntos);
       } else {
         log("INCORRECTO", "red");
-        biglog(puntos,"magenta");
+        log(`Fin del juego. Aciertos ${puntos}`);
+        biglog(puntos, "magenta");
         rl.prompt();
       }
     });
   } catch (error) {
-    log("Ya no quedan más preguntas.")
-    biglog(puntos,"magenta");
+    log("No hay nada más que preguntar.");
+    log(`Fin del juego. Aciertos ${puntos}`);
+    biglog(puntos, "magenta");
     rl.prompt();
   }
-}
+};
 
 /**
  * Pregunta todos los quizzes existentes en el modelo en orden aleatorio.
@@ -232,7 +234,7 @@ exports.playCmd = rl => {
   let element;
 
   shuffle(quizzes);
-  pregunta(rl, quizzes, puntos );
+  pregunta(rl, quizzes, puntos);
 };
 
 /**
